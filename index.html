@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuQuery AI</title>
+        <style>
+        /* --- Global Styles & Fonts --- */
+        :root {
+            --primary-color: #0d47a1;
+            --primary-hover: #1565c0;
+            --secondary-color: #f5f7fa;
+            --text-color: #334155;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            --base-font-size: 17px; /* NEW: Increased base font size */
+        }
+        html {
+            font-size: var(--base-font-size);
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* --- Layout: Header, Main, Footer --- */
+        .page-container { display: flex; flex-direction: column; min-height: 100vh; }
+        header {
+            background-color: var(--card-bg);
+            padding: 1.5rem 2.5rem; /* Increased padding */
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: var(--shadow);
+        }
+        header .header-title {
+            font-size: 1.8rem; /* Bigger */
+            font-weight: 700; /* Bolder */
+            color: var(--primary-color);
+        }
+        header .team-name {
+            font-size: 1rem; /* Bigger */
+            color: #64748b;
+        }
+        main { flex-grow: 1; padding: 2.5rem; display: flex; justify-content: center; }
+        .app-layout { display: flex; gap: 2.5rem; width: 100%; max-width: 1300px; } /* Wider max-width */
+        footer {
+            text-align: center;
+            padding: 2rem; /* Increased padding */
+            background-color: var(--card-bg);
+            border-top: 1px solid #e2e8f0;
+            color: #94a3b8;
+            font-size: 1rem; /* Bigger */
+        }
+        footer .footer-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1.5rem; }
+        footer .footer-links a { color: #475569; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; transition: color 0.3s; font-size: 1.1rem; } /* Bigger */
+        footer .footer-links a:hover { color: var(--primary-color); }
+        footer .footer-links svg { width: 22px; height: 22px; }
+
+        /* --- Panels --- */
+        .control-panel, .result-panel {
+            background: var(--card-bg);
+            padding: 2.5rem; /* Increased padding */
+            border-radius: 16px; /* More rounded */
+            box-shadow: var(--shadow);
+            flex: 1;
+            min-width: 380px;
+        }
+
+        /* --- Form & Input Elements --- */
+        .section { margin-bottom: 2rem; }
+        h2 { font-size: 1.6rem; color: #1e293b; border-bottom: 3px solid var(--primary-color); padding-bottom: 0.75rem; margin-bottom: 1.5rem; } /* Bigger and bolder */
+        label { display: block; margin-bottom: 0.75rem; font-weight: 600; font-size: 1.1rem; } /* Bigger */
+        input[type="text"], input[type="file"], textarea {
+            width: 100%; padding: 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; transition: border-color 0.3s, box-shadow 0.3s;
+            font-size: 1.05rem; /* Bigger text inside inputs */
+        }
+        input[type="text"]:focus, textarea:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.2); outline: none; }
+        textarea { resize: vertical; }
+        button {
+            background-color: var(--primary-color); color: white; padding: 1rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: 600; transition: background-color 0.3s; width: 100%;
+        }
+        button:hover { background-color: var(--primary-hover); }
+
+        /* --- Result & Status Area --- */
+        #status { display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 1.25rem; border-radius: 8px; background-color: #e3f2fd; font-size: 1.1rem; } /* Bigger */
+        #response-container { margin-top: 1.5rem; }
+        pre {
+            white-space: pre-wrap; word-wrap: break-word; background: #1e293b; color: #f8fafc; padding: 1.5rem; border-radius: 8px;
+            font-size: 1.05rem; /* Bigger JSON text */
+            line-height: 1.7; /* Increased line spacing for readability */
+        }
+        .loader { border: 5px solid #bbdefb; border-top: 5px solid var(--primary-color); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; display: none; } /* Bigger loader */
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .app-layout { flex-direction: column; }
+            main, header { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    <header>
+        <div class="header-title">Intelligent Document Query System</div>
+        <div class="team-name">Team: MindMates</div>
+    </header>
+
+    <main>
+        <div class="app-layout">
+            <!-- Left Column: Controls -->
+            <div class="control-panel">
+                <div class="section">
+                    <h2>Step 1: Analyze Document</h2>
+                    <div class="radio-group">
+                        <label><input type="radio" name="sourceType" value="url" checked> From URL</label>
+                        <label><input type="radio" name="sourceType" value="file" style="margin-left: 1rem;"> Upload File</label>
+                    </div>
+                    <div id="url-input-group" style="margin-top: 1rem;">
+                        <input type="text" id="documentUrl" placeholder="Paste document URL here...">
+                    </div>
+                    <div id="file-input-group" style="display: none; margin-top: 1rem;">
+                        <input type="file" id="documentFile" accept=".pdf">
+                    </div>
+                    <button id="indexBtn" style="margin-top: 1rem;">Analyze & Index</button>
+                </div>
+
+                <div class="section">
+                    <h2>Step 2: Ask a Question</h2>
+                    <textarea id="userRequest" rows="4" placeholder="e.g., Is knee surgery covered for a 3-month old policy?"></textarea>
+                    <label for="queryDocumentId">Document ID (optional)</label>
+                    <input type="text" id="queryDocumentId" placeholder="Auto-filled after analyzing a document">
+                    <button id="queryBtn" style="margin-top: 1rem;">Get Answer</button>
+                </div>
+            </div>
+
+            <!-- Right Column: Results -->
+            <div class="result-panel">
+                <h2>Response</h2>
+                <div id="status">
+                    <div class="loader"></div>
+                    <span id="statusText">Ready to analyze your documents.</span>
+                </div>
+                <div id="response-container" style="display: none;">
+                    <pre id="responseJson"></pre>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a id="githubLink" href="#" target="_blank">
+                <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297 24 5.67 18.627.297 12 .297z"/></svg>
+                <span>View source on GitHub</span>
+            </a>
+            <a id="youtubeLink" href="#" target="_blank">
+                <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><title>YouTube</title><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                <span>Checkout the YouTube video</span>
+            </a>
+        </div>
+        <div class="creator-credit">Made for HackRx 6.0 by Team: MindMates</div>
+    </footer>
+</div>
+
+<script>
+    // --- !! CONFIGURATION !! ---
+    // Update these URLs with your actual links.
+    const config = {
+        githubUrl: 'https://github.com/your-username/your-repo-name',
+        youtubeUrl: 'https://www.youtube.com/watch?v=your_video_id',
+        apiBaseUrl: 'http://127.0.0.1:8000'
+    };
+    // --- END OF CONFIGURATION ---
+
+    // Apply config to the page
+    document.getElementById('githubLink').href = config.githubUrl;
+    document.getElementById('youtubeLink').href = config.youtubeUrl;
+
+    // DOM Elements
+    const indexBtn = document.getElementById('indexBtn');
+    const queryBtn = document.getElementById('queryBtn');
+    const statusText = document.getElementById('statusText');
+    const loader = document.querySelector('.loader');
+    const responseContainer = document.getElementById('response-container');
+    const responseJson = document.getElementById('responseJson');
+    const docUrlInput = document.getElementById('documentUrl');
+    const docFileInput = document.getElementById('documentFile');
+    const userRequestInput = document.getElementById('userRequest');
+    const queryDocIdInput = document.getElementById('queryDocumentId');
+    const sourceTypeRadios = document.querySelectorAll('input[name="sourceType"]');
+    const urlInputGroup = document.getElementById('url-input-group');
+    const fileInputGroup = document.getElementById('file-input-group');
+
+    sourceTypeRadios.forEach(radio => {
+        radio.addEventListener('change', (event) => {
+            urlInputGroup.style.display = event.target.value === 'url' ? 'block' : 'none';
+            fileInputGroup.style.display = event.target.value === 'file' ? 'block' : 'none';
+        });
+    });
+
+    // Helper Functions
+    function showLoading(message) {
+        loader.style.display = 'block';
+        statusText.textContent = message;
+        responseContainer.style.display = 'none';
+    }
+    function showStatus(message, isError = false) {
+        loader.style.display = 'none';
+        statusText.textContent = message;
+        statusText.parentElement.style.backgroundColor = isError ? '#ffebee' : '#e3f2fd';
+    }
+    function showResponse(data) {
+        responseJson.textContent = JSON.stringify(data, null, 2);
+        responseContainer.style.display = 'block';
+    }
+
+    // Event Listeners
+    indexBtn.addEventListener('click', async () => {
+        const sourceType = document.querySelector('input[name="sourceType"]:checked').value;
+        showLoading('Analyzing document... This is the magic part, please wait.');
+        try {
+            let response;
+            if (sourceType === 'url') {
+                const docUrl = docUrlInput.value.trim();
+                if (!docUrl) { showStatus('Please provide a document URL.', true); return; }
+                response = await fetch(`${config.apiBaseUrl}/index-url`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ document_url: docUrl })
+                });
+            } else {
+                const file = docFileInput.files[0];
+                if (!file) { showStatus('Please select a file to upload.', true); return; }
+                const formData = new FormData();
+                formData.append('file', file);
+                response = await fetch(`${config.apiBaseUrl}/index-file`, { method: 'POST', body: formData });
+            }
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Indexing failed.');
+            }
+            const result = await response.json();
+            const newDocId = result.document_id;
+            showStatus(`${result.message} The new Document ID is: ${newDocId}`);
+            queryDocIdInput.value = newDocId;
+        } catch (error) {
+            showStatus(`Error: ${error.message}`, true);
+        }
+    });
+
+    queryBtn.addEventListener('click', async () => {
+        const userRequest = userRequestInput.value.trim();
+        if (!userRequest) { alert('Please enter your query.'); return; }
+        showLoading('Searching for the most relevant clauses and asking the AI...');
+        const queryDocId = queryDocIdInput.value.trim() || null;
+        try {
+            const response = await fetch(`${config.apiBaseUrl}/query`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ user_request: userRequest, document_id: queryDocId })
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Query failed.');
+            }
+            const result = await response.json();
+            showStatus('Query successful!');
+            showResponse(result);
+        } catch (error) {
+            showStatus(`Error: ${error.message}`, true);
+        }
+    });
+</script>
+
+</body>
+</html>

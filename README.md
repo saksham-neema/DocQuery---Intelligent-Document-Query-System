@@ -6,9 +6,8 @@ Markdown
 **Team:** MindMates
 
 ---
-
-![screenshot](./Screenshot%202025-08-08%20222150.png)
-![screenshot](./Screenshot%202025-08-08%20222219.png)
+<img width="1901" height="884" alt="Screenshot 2025-08-08 222150" src="https://github.com/user-attachments/assets/519bdad2-a6b2-44f4-81a7-4a987986379a" />
+<img width="1893" height="886" alt="Screenshot 2025-08-08 222219" src="https://github.com/user-attachments/assets/1298c0ac-a499-4f11-af7d-968b1970d20f" />
 
 ## 🚀 Overview
 
